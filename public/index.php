@@ -86,8 +86,32 @@ foreach ($data['timelineObjects'] as $key => $value) {
 	}
 }
 
+$date_from = $_GET['date_from'] ?? null;
+$date_to = $_GET['date_to'] ?? null;
 
-$query = 'SELECT locations.address, COUNT(*) AS c FROM visit JOIN locations ON visit.address = locations.id GROUP BY locations.address ORDER BY c DESC;';
+$dateValudationRegex = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/';
+
+$sqlFrom = '';
+if ($date_from !== null) {
+	if(!preg_match($dateValudationRegex, $date_from)) {
+	    echo 'Wrond from date format. Should be: YYYY-MM-DD';
+	    exit;
+	}
+	$sqlFrom = ' AND visit.startTimestamp >= "' . $date_from . '" ';
+}
+
+$sqlTo = '';
+if ($date_to !== null) {
+	if(!preg_match($dateValudationRegex, $date_to)) {
+	    echo 'Wrond to date format. Should be: YYYY-MM-DD';
+	    exit;
+	}
+	$sqlTo = ' AND visit.startTimestamp <= "' . $date_to . '" ';
+}
+
+
+
+$query = 'SELECT locations.address, COUNT(*) AS c FROM visit JOIN locations ON visit.address = locations.id WHERE 1 ' . $sqlFrom . $sqlTo . ' GROUP BY locations.address ORDER BY c DESC;';
 $stmt = $db->prepare($query);
 $stmt->execute();
 $results = $stmt->fetchAll();
