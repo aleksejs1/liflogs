@@ -1,7 +1,9 @@
 <?php
 
-if (!file_exists('database.db')) {
-	$db = new PDO("sqlite:database.db");
+require_once('../config.php');
+
+if (!file_exists($database)) {
+	$db = new PDO("sqlite:" . $database);
 
 	$query = "CREATE TABLE locations (
 	  id VARCHAR(28) PRIMARY KEY,
@@ -20,11 +22,8 @@ if (!file_exists('database.db')) {
 
 	$db->query($query);
 } else {
-	$db = new PDO("sqlite:database.db");
+	$db = new PDO("sqlite:" . $database);
 }
-
-
-$filename = '2023_AUGUST.json';
 
 $file = fopen($filename, 'r');
 $data = fread($file, filesize($filename));
