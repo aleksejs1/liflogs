@@ -92,7 +92,7 @@ $date_to = $_GET['date_to'] ?? null;
 $dateValudationRegex = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/';
 
 $sqlFrom = '';
-if ($date_from !== null) {
+if ($date_from !== null && $date_from !== '') {
 	if(!preg_match($dateValudationRegex, $date_from)) {
 	    echo 'Wrond from date format. Should be: YYYY-MM-DD';
 	    exit;
@@ -101,7 +101,7 @@ if ($date_from !== null) {
 }
 
 $sqlTo = '';
-if ($date_to !== null) {
+if ($date_to !== null && $date_to !== '') {
 	if(!preg_match($dateValudationRegex, $date_to)) {
 	    echo 'Wrond to date format. Should be: YYYY-MM-DD';
 	    exit;
@@ -109,13 +109,24 @@ if ($date_to !== null) {
 	$sqlTo = ' AND visit.startTimestamp <= "' . $date_to . '" ';
 }
 
-
-
 $query = 'SELECT locations.address, COUNT(*) AS c FROM visit JOIN locations ON visit.address = locations.id WHERE 1 ' . $sqlFrom . $sqlTo . ' GROUP BY locations.address ORDER BY c DESC;';
 $stmt = $db->prepare($query);
 $stmt->execute();
 $results = $stmt->fetchAll();
+
+echo '<h2>Visit top:</h2>';
+
 foreach ($results as $result => $value) {
 	echo $value['c'] . ' - ' . $value['address'] . '<br>' . "\n";
 }
 
+?>
+
+<h2>Filter:</h2>
+<form method="GET">
+	<label>Date from</label>
+	<input type="input" name="date_from" value="<?php echo $date_from; ?>">
+	<label>Date to</label>
+	<input type="input" name="date_to" value="<?php echo $date_to; ?>">
+	<input type="submit" name="submit">
+</form>
