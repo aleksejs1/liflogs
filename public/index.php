@@ -2,6 +2,30 @@
 
 require_once('../config.php');
 
+session_start();
+
+if (isset($_GET['logout']) && $_GET['logout'] === '1') {
+  unset($_SESSION['login']);
+}
+
+if (isset($_POST['login']) && isset($_POST['password'])) {
+  if ($_POST['login'] === $login && $_POST['password'] === $password) {
+    $_SESSION['login'] = $login;
+  }
+}
+
+if (!isset($_SESSION['login'])) {
+  echo '<form method="post">';
+  echo '    <input type="text" name="login" placeholder="login">';
+  echo '    <input type="password" name="password" placeholder="password">';
+  echo '    <input type="submit">';
+  echo '</form>';
+  exit();
+}
+
+echo '<a href="?logout=1">Logout</a>';
+
+
 if (!file_exists($database)) {
   $db = new PDO("sqlite:" . $database);
 
