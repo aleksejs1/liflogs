@@ -1,18 +1,22 @@
 <?php
 
+session_start();
+
 require_once('../config.php');
 if (file_exists('../config.local.php')) {
   require_once('../config.local.php');
 }
 
-session_start();
+require_once('../src/autoloader.php');
 
-if (isset($_GET['logout']) && $_GET['logout'] === '1') {
-  unset($_SESSION['login']);
+$request = new Request();
+
+if ($request->get('logout') === '1') {
+  session_unset();
 }
 
-if (isset($_POST['login']) && isset($_POST['password'])) {
-  if ($_POST['login'] === $login && $_POST['password'] === $password) {
+if ($request->post('login') && $request->post('password')) {
+  if ($request->post('login') === $login && $request->post('password') === $password) {
     $_SESSION['login'] = $login;
   }
 }
@@ -27,7 +31,6 @@ if (!isset($_SESSION['login'])) {
 }
 
 echo '<a href="?logout=1">Logout</a>';
-
 
 if (!file_exists($database)) {
   $db = new PDO("sqlite:" . $database);
@@ -113,8 +116,8 @@ foreach ($data['timelineObjects'] as $key => $value) {
   }
 }
 
-$date_from = $_GET['date_from'] ?? null;
-$date_to = $_GET['date_to'] ?? null;
+$date_from = $request->get('date_from');
+$date_to = $request->get('date_to');
 
 $dateValudationRegex = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/';
 
