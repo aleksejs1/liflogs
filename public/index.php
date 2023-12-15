@@ -1,6 +1,9 @@
 <?php
 
 require_once('../config.php');
+if (file_exists('../config.local.php')) {
+  require_once('../config.local.php');
+}
 
 session_start();
 
@@ -15,7 +18,7 @@ if (isset($_POST['login']) && isset($_POST['password'])) {
 }
 
 if (!isset($_SESSION['login'])) {
-  echo '<form method="post">';
+  echo '<form method="post" action="?">';
   echo '    <input type="text" name="login" placeholder="login">';
   echo '    <input type="password" name="password" placeholder="password">';
   echo '    <input type="submit">';
@@ -118,19 +121,21 @@ $dateValudationRegex = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/';
 $sqlFrom = '';
 if ($date_from !== null && $date_from !== '') {
   if(!preg_match($dateValudationRegex, $date_from)) {
-      echo 'Wrond from date format. Should be: YYYY-MM-DD';
-      exit;
+      echo '<p>Wrong <b>from</b> date format. Should be: YYYY-MM-DD</p>';
+      $date_from = '';
+  } else {
+    $sqlFrom = ' AND visit.startTimestamp >= "' . $date_from . '" ';
   }
-  $sqlFrom = ' AND visit.startTimestamp >= "' . $date_from . '" ';
 }
 
 $sqlTo = '';
 if ($date_to !== null && $date_to !== '') {
   if(!preg_match($dateValudationRegex, $date_to)) {
-      echo 'Wrond to date format. Should be: YYYY-MM-DD';
-      exit;
+      echo '<p>Wrong <b>to</b> date format. Should be: YYYY-MM-DD</p>';
+      $date_to = '';
+  } else {
+    $sqlTo = ' AND visit.startTimestamp <= "' . $date_to . '" ';
   }
-  $sqlTo = ' AND visit.startTimestamp <= "' . $date_to . '" ';
 }
 
 $query = 'SELECT locations.address, COUNT(*) AS c FROM visit JOIN locations ON visit.address = locations.id WHERE 1 ' . $sqlFrom . $sqlTo . ' GROUP BY locations.address ORDER BY c DESC;';
